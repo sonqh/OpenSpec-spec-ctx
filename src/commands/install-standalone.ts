@@ -59,15 +59,15 @@ export function removeCommandFor(install: CliInstallInfo): string | null {
   }
   switch (install.packageManager) {
     case 'npm':
-      return 'npm uninstall -g @sonqh/openspec';
+      return 'npm uninstall -g @sonqh/specctx-openspec';
     case 'pnpm':
-      return 'pnpm remove -g @sonqh/openspec';
+      return 'pnpm remove -g @sonqh/specctx-openspec';
     case 'yarn':
-      return 'yarn global remove @sonqh/openspec';
+      return 'yarn global remove @sonqh/specctx-openspec';
     case 'bun':
-      return 'bun remove -g @sonqh/openspec';
+      return 'bun remove -g @sonqh/specctx-openspec';
     case 'volta':
-      return 'volta uninstall @sonqh/openspec';
+      return 'volta uninstall @sonqh/specctx-openspec';
     default:
       return null;
   }

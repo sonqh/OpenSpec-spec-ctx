@@ -1,4 +1,4 @@
-# Transcript: fresh path with @sonqh/openspec 1.15.1 and spec-ctx 0.1.2
+# Transcript: fresh path with @sonqh/specctx-openspec 1.15.1 and spec-ctx 0.1.2
 
 Date: 2026-10-27. Sample project: a Node package with `src/index.js`, `test/add.test.js`, `node --test`.
 Tools: `openspec` is the fork build from `/home/claude/openspec-spec-ctx` (spec-ctx-adopt, packed to a .tgz and installed in a private prefix). `specctx` is `npx -y spec-ctx@0.1.2`.

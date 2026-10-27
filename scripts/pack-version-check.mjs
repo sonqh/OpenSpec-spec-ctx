@@ -69,7 +69,7 @@ function main() {
   let tgzPath;
 
   try {
-    log(`Packing @sonqh/openspec@${expected}...`);
+    log(`Packing @sonqh/specctx-openspec@${expected}...`);
     const filename = npmPack();
     tgzPath = path.resolve(filename);
     log(`Created: ${tgzPath}`);

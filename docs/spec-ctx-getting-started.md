@@ -11,7 +11,7 @@ Upstream OpenSpec links a delta requirement to its main spec requirement by head
 The fork is not on npm. It ships on the release page of `github.com/sonqh/OpenSpec-spec-ctx` as a `.tgz` package and as standalone binaries. Pick one.
 
 ```bash
-npm install -g https://github.com/sonqh/OpenSpec-spec-ctx/releases/download/<tag>/sonqh-openspec-<version>.tgz
+npm install -g https://github.com/sonqh/OpenSpec-spec-ctx/releases/download/<tag>/sonqh-specctx-openspec-<version>.tgz
 npx -y spec-ctx@0.1.2 --help          # spec-ctx, bin `specctx`
 ```
 
