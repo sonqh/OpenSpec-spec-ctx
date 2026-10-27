@@ -83,3 +83,7 @@ SWC = "schema-which-command"
 SSS = "specs-sync-skill"
 TEL = "telemetry"
 TAP = "template-artifact-pipeline"
+
+[gate]
+# The command gate runs for openspec validate. This repo is the fork, so it runs its own build.
+openspec = "node bin/openspec.js"

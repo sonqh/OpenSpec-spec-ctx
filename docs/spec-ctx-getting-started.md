@@ -8,12 +8,21 @@ Upstream OpenSpec links a delta requirement to its main spec requirement by head
 
 ## Install
 
+The fork is not on npm. It ships on the release page of `github.com/sonqh/OpenSpec-spec-ctx` as a `.tgz` package and as standalone binaries. Pick one.
+
 ```bash
-npm install -g @sonqh/openspec        # the fork, bin `openspec`
+npm install -g https://github.com/sonqh/OpenSpec-spec-ctx/releases/download/<tag>/sonqh-openspec-<version>.tgz
 npx -y spec-ctx@0.1.2 --help          # spec-ctx, bin `specctx`
 ```
 
-Until the fork is on npm, take the `.tgz` from the release page of `github.com/sonqh/OpenSpec-spec-ctx` and run `npm install -g <path to .tgz>`. `openspec --version` prints `1.15.1`. Node 22 is the floor for both tools.
+`npm install -g` accepts a tarball URL and needs no build step. `openspec --version` prints the fork version. Node 22 is the floor for both tools. To build the tarball yourself: `pnpm install && pnpm build && pnpm pack` on the `spec-ctx-adopt` branch.
+
+Tell spec-ctx to run the fork in its gate. Put this in `spec-ctx.toml` after `specctx init --all`. spec-ctx 0.1.3 and later writes the key with the upstream default, so you only change its value:
+
+```toml
+[gate]
+openspec = "openspec"
+```
 
 The rest of this guide writes `npx -y spec-ctx@0.1.2` as `specctx`. Use either form.
 
@@ -176,14 +185,14 @@ The same delta under upstream `@fission-ai/openspec@1.15.0` prints `Archive woul
 `gate` runs `check --strict`, both markdown linters, `openspec validate --all --strict`, and a 500 character length check on active deltas. It stops at the first failure.
 
 ```bash
-$ SPECCTX_OPENSPEC=openspec specctx gate --strict
+$ specctx gate --strict
 check: ok (strict)
 linters: ok (10 file(s))
 validate: ok (strict)
 spec-length: ok
 ```
 
-Set `SPECCTX_OPENSPEC=openspec` so the validate step runs the fork on your PATH. Without it `gate` runs `npx -y @fission-ai/openspec@latest`, which is upstream. The archive and the steps after it:
+The validate step runs the command in `[gate] openspec`. Without that key `gate` runs `npx -y @fission-ai/openspec@latest`, which is upstream. The env var `SPECCTX_OPENSPEC` overrides the key for one run. The archive and the steps after it:
 
 ```bash
 $ openspec archive add-greeting -y
@@ -198,7 +207,7 @@ $ specctx check --strict
 $ specctx handoff write
 wrote .ctx/handoff.md
 
-$ SPECCTX_OPENSPEC=openspec specctx gate --strict
+$ specctx gate --strict
 spec-length: ok
 ```
 
@@ -217,7 +226,7 @@ All six exit 0. `openspec/specs/greeting/spec.md` carries the new title under `R
 - `openspec init` ends with a hint to run `/opsx:propose`. The propose skill does not know about `specctx id new`. Run `specctx init --all` first and take the IDs from it.
 - `[ids] caps` in `spec-ctx.toml` is a guard, not a requirement. `id new REQ GRT` and `check` work with `caps = []`. Set it when you want `check` to reject an unknown code.
 - `openspec new change` writes `.openspec.yaml` and `README.md` only. The artifact templates live in `openspec/schemas/spec-driven-ids/templates/`. No message points you there.
-- `gate` runs upstream OpenSpec through `npx` unless `SPECCTX_OPENSPEC` names the fork. The first run downloads it.
+- `gate` runs upstream OpenSpec through `npx` unless `[gate] openspec` in `spec-ctx.toml` names the fork. The first upstream run downloads it.
 - The `task start` footer can read over 100 percent on a tiny project. The bundle holds decisions and task lines, which are not spec text.
 - `handoff write` after the last archive prints `change: none` and `evidence: 0 task(s)`. It counts active changes only. The evidence files stay under `.ctx/evidence/<change>/`.
 - `specctx task next` exits 1 with `no open task` when no change is active. Exit 1 is the findings code, not a crash.
