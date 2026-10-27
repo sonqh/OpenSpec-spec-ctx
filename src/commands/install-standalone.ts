@@ -59,15 +59,15 @@ export function removeCommandFor(install: CliInstallInfo): string | null {
   }
   switch (install.packageManager) {
     case 'npm':
-      return 'npm uninstall -g @fission-ai/openspec';
+      return 'npm uninstall -g @sonqh/openspec';
     case 'pnpm':
-      return 'pnpm remove -g @fission-ai/openspec';
+      return 'pnpm remove -g @sonqh/openspec';
     case 'yarn':
-      return 'yarn global remove @fission-ai/openspec';
+      return 'yarn global remove @sonqh/openspec';
     case 'bun':
-      return 'bun remove -g @fission-ai/openspec';
+      return 'bun remove -g @sonqh/openspec';
     case 'volta':
-      return 'volta uninstall @fission-ai/openspec';
+      return 'volta uninstall @sonqh/openspec';
     default:
       return null;
   }

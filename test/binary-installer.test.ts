@@ -137,7 +137,7 @@ describe.skipIf(process.platform === 'win32')('standalone installer (install.sh)
     expect(result.code).not.toBe(0);
     expect(result.installed).toBeNull();
     expect(result.out).toContain('found no release with the standalone files');
-    expect(result.out).toContain('npm install -g @fission-ai/openspec');
+    expect(result.out).toContain('npm install -g @sonqh/openspec');
   });
 
   it('installs a pinned version even when it is not the newest', async () => {

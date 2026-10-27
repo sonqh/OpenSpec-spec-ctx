@@ -22,7 +22,7 @@
   $arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
     'X64' { 'x64' }
     'Arm64' { 'arm64' }
-    default { throw "openspec install: unsupported CPU $_. Install with npm instead: npm install -g @fission-ai/openspec" }
+    default { throw "openspec install: unsupported CPU $_. Install with npm instead: npm install -g @sonqh/openspec" }
   }
   $asset = "openspec-windows-$arch.exe"
 
@@ -41,7 +41,7 @@
   $releases = if ($env:OPENSPEC_RELEASES_URL) { $env:OPENSPEC_RELEASES_URL.TrimEnd('/') } else { 'https://github.com/Fission-AI/OpenSpec/releases' }
   Assert-Source 'OPENSPEC_RELEASES_URL' $releases
   if ($env:OPENSPEC_DOWNLOAD_URL) { Assert-Source 'OPENSPEC_DOWNLOAD_URL' $env:OPENSPEC_DOWNLOAD_URL }
-  $npmHint = 'Or install with npm (Node.js 20.19+): npm install -g @fission-ai/openspec'
+  $npmHint = 'Or install with npm (Node.js 20.19+): npm install -g @sonqh/openspec'
   $dir = if ($env:OPENSPEC_INSTALL_DIR) { $env:OPENSPEC_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'Programs\openspec' }
   # Absolute, so the user PATH entry works from any directory.
   $dir = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($dir)

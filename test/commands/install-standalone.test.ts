@@ -41,24 +41,24 @@ describe('openspec install', () => {
   });
 
   describe('removeCommandFor', () => {
-    const global = (packageManager: string | null, location = '/usr/lib/node_modules/@fission-ai/openspec') =>
+    const global = (packageManager: string | null, location = '/usr/lib/node_modules/@sonqh/openspec') =>
       ({ location, packageManager, scope: 'global' }) as Parameters<typeof removeCommandFor>[0];
 
     it('names the uninstall command of the package manager that owns the copy', () => {
-      expect(removeCommandFor(global('npm'))).toBe('npm uninstall -g @fission-ai/openspec');
-      expect(removeCommandFor(global('pnpm'))).toBe('pnpm remove -g @fission-ai/openspec');
-      expect(removeCommandFor(global('yarn'))).toBe('yarn global remove @fission-ai/openspec');
-      expect(removeCommandFor(global('bun'))).toBe('bun remove -g @fission-ai/openspec');
-      expect(removeCommandFor(global('volta'))).toBe('volta uninstall @fission-ai/openspec');
+      expect(removeCommandFor(global('npm'))).toBe('npm uninstall -g @sonqh/openspec');
+      expect(removeCommandFor(global('pnpm'))).toBe('pnpm remove -g @sonqh/openspec');
+      expect(removeCommandFor(global('yarn'))).toBe('yarn global remove @sonqh/openspec');
+      expect(removeCommandFor(global('bun'))).toBe('bun remove -g @sonqh/openspec');
+      expect(removeCommandFor(global('volta'))).toBe('volta uninstall @sonqh/openspec');
     });
 
     it('sends the Homebrew formula to brew', () => {
-      const cellar = '/opt/homebrew/Cellar/openspec/1.14.3/libexec/lib/node_modules/@fission-ai/openspec';
+      const cellar = '/opt/homebrew/Cellar/openspec/1.14.3/libexec/lib/node_modules/@sonqh/openspec';
       expect(removeCommandFor(global('npm', cellar))).toBe('brew uninstall openspec');
     });
 
     it('suggests nothing for copies that are not a global install', () => {
-      expect(removeCommandFor({ location: '/p/node_modules/@fission-ai/openspec', packageManager: 'npm', scope: 'project' })).toBeNull();
+      expect(removeCommandFor({ location: '/p/node_modules/@sonqh/openspec', packageManager: 'npm', scope: 'project' })).toBeNull();
       expect(removeCommandFor({ location: '/repo', packageManager: null, scope: 'source' })).toBeNull();
       expect(removeCommandFor({ location: null, packageManager: null, scope: 'standalone' })).toBeNull();
     });

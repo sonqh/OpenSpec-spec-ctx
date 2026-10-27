@@ -51,7 +51,7 @@ main() {
   case "$(uname -m)" in
     x86_64 | amd64) arch=x64 ;;
     arm64 | aarch64) arch=arm64 ;;
-    *) fail "unsupported CPU $(uname -m). Install with npm instead: npm install -g @fission-ai/openspec" ;;
+    *) fail "unsupported CPU $(uname -m). Install with npm instead: npm install -g @sonqh/openspec" ;;
   esac
   # An x64 shell under Rosetta still runs on an Apple Silicon Mac.
   if [ "$os" = darwin ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = 1 ]; then
@@ -108,7 +108,7 @@ main() {
     fi
   }
 
-  npm_hint="or install with npm (Node.js 20.19+): npm install -g @fission-ai/openspec"
+  npm_hint="or install with npm (Node.js 20.19+): npm install -g @sonqh/openspec"
   if [ -n "${OPENSPEC_DOWNLOAD_URL:-}" ]; then
     base=${OPENSPEC_DOWNLOAD_URL%/}
   elif [ "$version" != latest ]; then
