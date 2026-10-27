@@ -126,6 +126,7 @@
   "lint openspec/changes/add-global-install-scope/design.md ste:long-sentence 1",
   "lint openspec/changes/add-global-install-scope/design.md ste:semicolon 6",
   "lint openspec/changes/add-global-install-scope/proposal.md ste:semicolon 1",
+  "lint openspec/changes/add-id-aware-requirement-matching/tasks.md ste:long-sentence 1",
   "lint openspec/changes/add-init-agents-target/proposal.md ste:long-sentence 1",
   "lint openspec/changes/add-init-agents-target/proposal.md tells:dash 4",
   "lint openspec/changes/add-init-agents-target/specs/ai-tool-paths/spec.md ste:long-sentence 1",
