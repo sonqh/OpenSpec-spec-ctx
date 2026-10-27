@@ -1,3 +1,13 @@
+## This fork
+
+This is a fork of [OpenSpec](https://github.com/Fission-AI/OpenSpec) for projects that use [spec-ctx](https://github.com/sonqh/spec-ctx). The package is `@sonqh/openspec` and the bin is still `openspec`.
+
+- A requirement header that starts with `REQ-<CAP>-NNN`, or a scenario header that starts with `SCN-<CAP>-NNN-N`, matches its main spec entry by that ID. `archive`, `validate --strict`, and `show --diff` use the same key. A header without an ID matches by text, as upstream does.
+- A retitled header with the same ID still archives.
+- spec-ctx allocates the IDs and runs the task loop on top.
+
+Read [docs/spec-ctx-getting-started.md](docs/spec-ctx-getting-started.md) for the install and a full run.
+
 <p align="center">
   <a href="https://github.com/Fission-AI/OpenSpec">
     <picture>
