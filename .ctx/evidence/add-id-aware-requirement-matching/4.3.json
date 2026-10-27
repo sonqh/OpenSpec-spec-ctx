@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-27T06:58:20.736Z",
+  "files": {},
+  "kind": "command",
+  "reqs": [
+    "REQ-CA-014",
+    "REQ-CLIV-021"
+  ],
+  "task": "add-id-aware-requirement-matching/4.3",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": "pnpm exec vitest run test/core/specs-apply.requirement-name-near-miss.test.ts test/core/validation.archive-preflight.test.ts test/core/archive.test.ts test/core/validation.test.ts",
+    "exit": 0,
+    "stderr_tail": "",
+    "stdout_sha256": "051639233d00d4139c0faaf0d8aa6580735a87be31aa9ce51a9e468c8f4170d5"
+  }
+}

@@ -3,6 +3,7 @@ import {
   extractRequirementsSection,
   foldRequirementName,
   normalizeRequirementName,
+  requirementMatchKey,
 } from '../core/parsers/requirement-blocks.js';
 
 /** A main-spec requirement block, and how its header matched the delta's. */
@@ -22,9 +23,12 @@ export interface MatchedRequirementBlock {
  * Find the raw markdown block for a requirement by name in a spec file.
  *
  * Delegates to extractRequirementsSection() which already handles code fences,
- * section boundaries, and requirement header parsing. We just look up by name:
- * exactly first, then falling back to the shared case/whitespace fold so a
- * header that differs only in spelling still shows its diff, flagged inexact.
+ * section boundaries, and requirement header parsing. We just look up by key
+ * (requirementMatchKey: the ID token when the header has one, the full text
+ * otherwise): exactly first, then falling back to the shared case/whitespace
+ * fold so a header that differs only in spelling still shows its diff, flagged
+ * inexact. A header matched by ID is exact whatever its title says, because
+ * archive matches it the same way.
  *
  * Returns null if no requirement header matches either way.
  */
@@ -33,13 +37,13 @@ export function extractRequirementBlock(
   requirementName: string
 ): MatchedRequirementBlock | null {
   const parts = extractRequirementsSection(specContent);
-  const targetName = normalizeRequirementName(requirementName);
-  const foldedTarget = foldRequirementName(targetName);
+  const targetKey = requirementMatchKey(requirementName);
+  const foldedTarget = foldRequirementName(requirementName);
   let folded: MatchedRequirementBlock | null = null;
 
   for (const block of parts.bodyBlocks) {
     const name = normalizeRequirementName(block.name);
-    if (name === targetName) {
+    if (requirementMatchKey(name) === targetKey) {
       return { raw: block.raw, name, exact: true };
     }
     if (!folded && foldRequirementName(name) === foldedTarget) {
@@ -73,7 +77,8 @@ function ensureTrailingNewline(s: string): string {
 /**
  * Build a map from folded RENAMED TO name to the original main-spec name.
  * Renames apply in source order, so a chain such as A -> B -> C maps C back to
- * A. That is the block a later MODIFIED C replaces.
+ * A. That is the block a later MODIFIED C replaces. The fold is the ID key for
+ * a header that starts with an ID token, so a lookup by ID finds the entry.
  */
 export function buildRenameMap(renames: Array<{ from: string; to: string }>): Map<string, string> {
   const map = new Map<string, string>();

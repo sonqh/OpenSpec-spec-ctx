@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-27T06:57:44.005Z",
+  "files": {},
+  "kind": "command",
+  "reqs": [
+    "REQ-CLIV-021"
+  ],
+  "task": "add-id-aware-requirement-matching/3.1",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": "pnpm exec vitest run test/core/validation.id-matching.test.ts",
+    "exit": 0,
+    "stderr_tail": "",
+    "stdout_sha256": "533055b97664bca977e15a2c8eba09b5e541ed92ccc2a900b010de0b63440a67"
+  }
+}

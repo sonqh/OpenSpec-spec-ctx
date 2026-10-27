@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-27T06:57:34.206Z",
+  "files": {},
+  "kind": "command",
+  "reqs": [
+    "REQ-CA-014"
+  ],
+  "task": "add-id-aware-requirement-matching/2.1",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": "pnpm exec vitest run test/core/specs-apply.id-matching.test.ts",
+    "exit": 0,
+    "stderr_tail": "",
+    "stdout_sha256": "ae6b5c26b1b5c4817fb39f2b2525d4049e9b87b63d9617cc10d06018671d1746"
+  }
+}

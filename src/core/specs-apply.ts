@@ -16,7 +16,9 @@ import {
   describeUnappliedContent,
   foldRequirementName,
   parseDeltaSpec,
+  displayMatchKey,
   normalizeRequirementName,
+  requirementMatchKey,
   type RequirementBlock,
   type RequirementsSectionParts,
 } from './parsers/requirement-blocks.js';
@@ -261,7 +263,7 @@ export async function buildUpdatedSpec(
   // Pre-validate duplicates within sections
   const addedNames = new Set<string>();
   for (const add of plan.added) {
-    const name = normalizeRequirementName(add.name);
+    const name = requirementMatchKey(add.name);
     if (addedNames.has(name)) {
       throw new Error(
         `${specName} validation failed - duplicate requirement in ADDED for header "### Requirement: ${add.name}"`
@@ -271,7 +273,7 @@ export async function buildUpdatedSpec(
   }
   const modifiedNames = new Set<string>();
   for (const mod of plan.modified) {
-    const name = normalizeRequirementName(mod.name);
+    const name = requirementMatchKey(mod.name);
     if (modifiedNames.has(name)) {
       throw new Error(
         `${specName} validation failed - duplicate requirement in MODIFIED for header "### Requirement: ${mod.name}"`
@@ -281,7 +283,7 @@ export async function buildUpdatedSpec(
   }
   const removedNamesSet = new Set<string>();
   for (const rem of plan.removed) {
-    const name = normalizeRequirementName(rem);
+    const name = requirementMatchKey(rem);
     if (removedNamesSet.has(name)) {
       throw new Error(
         `${specName} validation failed - duplicate requirement in REMOVED for header "### Requirement: ${rem}"`
@@ -292,8 +294,8 @@ export async function buildUpdatedSpec(
   const renamedFromSet = new Set<string>();
   const renamedToSet = new Set<string>();
   for (const { from, to } of plan.renamed) {
-    const fromNorm = normalizeRequirementName(from);
-    const toNorm = normalizeRequirementName(to);
+    const fromNorm = requirementMatchKey(from);
+    const toNorm = requirementMatchKey(to);
     if (renamedFromSet.has(fromNorm)) {
       throw new Error(
         `${specName} validation failed - duplicate FROM in RENAMED for header "### Requirement: ${from}"`
@@ -319,8 +321,8 @@ export async function buildUpdatedSpec(
   }
   // Renamed interplay: MODIFIED must reference the NEW header, not FROM
   for (const { from, to } of plan.renamed) {
-    const fromNorm = normalizeRequirementName(from);
-    const toNorm = normalizeRequirementName(to);
+    const fromNorm = requirementMatchKey(from);
+    const toNorm = requirementMatchKey(to);
     // A REMOVED naming the FROM side contradicts the rename. This used to
     // fail incidentally at apply time (the rename consumed the old header,
     // so REMOVED hit "not found"); now that a missing REMOVED target is a
@@ -333,10 +335,12 @@ export async function buildUpdatedSpec(
     if (removedFoldMatch !== undefined) {
       throw new Error(
         `${specName} validation failed - requirement present in multiple sections (RENAMED and REMOVED) for header "### Requirement: ${from}"` +
-          (removedFoldMatch === fromNorm ? '' : ` (REMOVED spells it "${removedFoldMatch}")`)
+          (removedFoldMatch === fromNorm ? '' : ` (REMOVED spells it "${displayMatchKey(removedFoldMatch)}")`)
       );
     }
-    if (modifiedNames.has(fromNorm)) {
+    // A pair whose FROM and TO share one ID token is a retitle under a stable
+    // key, so a MODIFIED with that ID names the new header already.
+    if (fromNorm !== toNorm && modifiedNames.has(fromNorm)) {
       throw new Error(
         `${specName} validation failed - when a rename exists, MODIFIED must reference the NEW header "### Requirement: ${to}"`
       );
@@ -351,7 +355,7 @@ export async function buildUpdatedSpec(
   if (conflicts.length > 0) {
     const c = conflicts[0];
     throw new Error(
-      `${specName} validation failed - requirement present in multiple sections (${c.a} and ${c.b}) for header "### Requirement: ${c.name}"`
+      `${specName} validation failed - requirement present in multiple sections (${c.a} and ${c.b}) for header "### Requirement: ${displayMatchKey(c.name)}"`
     );
   }
   const hasAnyDelta = plan.added.length + plan.modified.length + plan.removed.length + plan.renamed.length > 0;
@@ -433,22 +437,40 @@ export async function buildUpdatedSpec(
     );
   }
 
-  // Extract requirements section and build name->block map
+  // Extract requirements section and build key->block map. The key is the ID
+  // token when the header starts with one, and the full header text otherwise
+  // (requirementMatchKey). Two blocks with the same ID would collapse into one
+  // map entry and the first would be lost without a word, so that is an error
+  // here. The structure check above already refuses two identical headers.
   const parts = extractRequirementsSection(targetContent);
   const nameToBlock = new Map<string, RequirementBlock>();
   for (const block of parts.bodyBlocks) {
-    nameToBlock.set(normalizeRequirementName(block.name), block);
+    const key = requirementMatchKey(block.name);
+    const earlier = nameToBlock.get(key);
+    if (earlier) {
+      throw new Error(
+        `${specName}: duplicate requirement ID ${displayMatchKey(key)} in ${specName}: ` +
+          `"### Requirement: ${earlier.name}" and "### Requirement: ${block.name}" share it. ` +
+          `Give each requirement its own ID before archiving.`
+      );
+    }
+    nameToBlock.set(key, block);
   }
   // Keep source blocks immutable for loss attribution. This parallel key list
   // carries only positional identity as renames change lookup keys.
-  const orderedKeys = parts.bodyBlocks.map((block) => normalizeRequirementName(block.name));
+  const orderedKeys = parts.bodyBlocks.map((block) => requirementMatchKey(block.name));
 
   // Apply operations in order: RENAMED → REMOVED → MODIFIED → ADDED
   // RENAMED
   let renamedApplied = 0;
   for (const r of plan.renamed) {
-    const from = normalizeRequirementName(r.from);
-    const to = normalizeRequirementName(r.to);
+    const from = requirementMatchKey(r.from);
+    const to = requirementMatchKey(r.to);
+    const toName = normalizeRequirementName(r.to);
+    // FROM and TO that carry the same ID token name one requirement. The pair
+    // is a retitle under a stable ID, so the header text changes and the key
+    // stays. It is not a "target already exists" collision.
+    const sameKey = from === to;
     if (!nameToBlock.has(from)) {
       // Source gone but target present means the rename was already synced
       // to the baseline (early-sync pattern) — re-applying it is a no-op,
@@ -469,7 +491,7 @@ export async function buildUpdatedSpec(
       }
       throw new Error(`${specName} RENAMED failed for header "### Requirement: ${r.from}" - source not found`);
     }
-    if (nameToBlock.has(to)) {
+    if (!sameKey && nameToBlock.has(to)) {
       throw new Error(`${specName} RENAMED failed for header "### Requirement: ${r.to}" - target already exists`);
     }
     // A target that differs from another requirement only in case or interior
@@ -484,12 +506,14 @@ export async function buildUpdatedSpec(
       );
     }
     const block = nameToBlock.get(from)!;
-    const newHeader = `### Requirement: ${to}`;
+    // A same-ID pair whose new title is already in the spec was synced before.
+    if (sameKey && normalizeRequirementName(block.name) === toName) continue;
+    const newHeader = `### Requirement: ${toName}`;
     const rawLines = block.raw.split('\n');
     rawLines[0] = newHeader;
     const renamedBlock: RequirementBlock = {
       headerLine: newHeader,
-      name: to,
+      name: toName,
       raw: rawLines.join('\n'),
     };
     nameToBlock.delete(from);
@@ -506,7 +530,7 @@ export async function buildUpdatedSpec(
   // REMOVED
   let removedApplied = 0;
   for (const name of plan.removed) {
-    const key = normalizeRequirementName(name);
+    const key = requirementMatchKey(name);
     if (!nameToBlock.has(key)) {
       // Requirement gone from the baseline means the removal was already
       // synced (early-sync pattern) — re-applying it is a no-op, not a
@@ -534,14 +558,16 @@ export async function buildUpdatedSpec(
   // MODIFIED
   let modifiedApplied = 0;
   for (const mod of plan.modified) {
-    const key = normalizeRequirementName(mod.name);
+    const key = requirementMatchKey(mod.name);
     const currentBlock = nameToBlock.get(key);
     if (!currentBlock) {
       throw new Error(`${specName} MODIFIED failed for header "### Requirement: ${mod.name}" - not found`);
     }
-    // Replace block with provided raw (ensure header line matches key)
+    // Replace block with provided raw (ensure header line matches key). Keys
+    // are compared, not names, so a MODIFIED block with the same ID and a new
+    // title is accepted and its header text replaces the old one.
     const modHeaderMatch = mod.raw.split('\n')[0].match(/^###\s*Requirement:\s*(.+)\s*$/i);
-    if (!modHeaderMatch || normalizeRequirementName(modHeaderMatch[1]) !== key) {
+    if (!modHeaderMatch || requirementMatchKey(modHeaderMatch[1]) !== key) {
       throw new Error(
         `${specName} MODIFIED failed for header "### Requirement: ${mod.name}" - header mismatch in content`
       );
@@ -565,7 +591,7 @@ export async function buildUpdatedSpec(
   // ADDED
   let addedApplied = 0;
   for (const add of plan.added) {
-    const key = normalizeRequirementName(add.name);
+    const key = requirementMatchKey(add.name);
     const existing = nameToBlock.get(key);
     if (existing) {
       // Identical content means the requirement was already synced to the

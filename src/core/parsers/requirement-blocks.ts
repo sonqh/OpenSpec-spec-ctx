@@ -23,15 +23,69 @@ export function normalizeRequirementName(name: string): string {
 }
 
 /**
+ * An ID token at the start of a requirement or scenario name, as a spec tree
+ * adopted by spec-ctx writes it: `REQ-CI-012 Skill generation` or
+ * `SCN-CI-012-1 Generating skills`. The token is followed by whitespace or ends
+ * the name. The optional `id:` prefix makes the key functions below idempotent,
+ * so a key that is passed back in comes out unchanged.
+ */
+const ID_RE = /^(?:id:)?((?:REQ|SCN)-[A-Z]{2,6}-\d{3,}(?:-\d+)?)(?:\s|$)/;
+
+/** The prefix every ID key carries, so a key never collides with a plain name. */
+const ID_KEY_PREFIX = 'id:';
+
+/**
+ * The key two requirement headers are matched on.
+ *
+ * A header that starts with an ID token is matched on that token alone, so a
+ * delta can retitle a requirement and still find it in the main spec. A header
+ * without a token keeps the full normalized text as its key, so matching for
+ * such headers is exactly what it was.
+ */
+export function requirementMatchKey(name: string): string {
+  const normalized = normalizeRequirementName(name);
+  const match = normalized.match(ID_RE);
+  return match ? `${ID_KEY_PREFIX}${match[1]}` : normalized;
+}
+
+/**
+ * The same rule for a scenario name, applied after the `Scenario:` prefix is
+ * gone (scenarioNameFromHeaderText). Both the current and the incoming block
+ * go through here, so a scenario that keeps its SCN token but changes its
+ * title is not reported as a dropped scenario.
+ */
+export function scenarioMatchKey(name: string): string {
+  const trimmed = name.trim();
+  const match = trimmed.match(ID_RE);
+  return match ? `${ID_KEY_PREFIX}${match[1]}` : trimmed;
+}
+
+/** True when a match key came from an ID token rather than from header text. */
+export function isIdMatchKey(key: string): boolean {
+  return key.startsWith(ID_KEY_PREFIX);
+}
+
+/** The text a message shows for a match key: the ID token, or the name itself. */
+export function displayMatchKey(key: string): string {
+  return isIdMatchKey(key) ? key.slice(ID_KEY_PREFIX.length) : key;
+}
+
+/**
  * Case- and whitespace-insensitive fold of a requirement name. Requirement
  * matching itself is case-sensitive (normalizeRequirementName); this fold
  * exists only for typo detection - near-miss REMOVED, ADDED and RENAMED
  * headers and the RENAMED+REMOVED cross-section conflict - where two spellings
  * that differ only in case or interior whitespace mean a mistake, never two
  * requirements.
+ *
+ * A name that starts with an ID token folds to its ID key. Two such headers are
+ * the same requirement when their tokens agree, whatever the title says, so a
+ * title that changed is never reported as a near miss.
  */
 export function foldRequirementName(name: string): string {
-  return normalizeRequirementName(name).toLowerCase().replace(/\s+/g, ' ');
+  const key = requirementMatchKey(name);
+  if (isIdMatchKey(key)) return key;
+  return key.toLowerCase().replace(/\s+/g, ' ');
 }
 
 /** The canonical requirement header the delta reader recognizes. */
@@ -618,14 +672,21 @@ export function diffScenarioNames(
   // other leaves max(0, N - M) instances unmatched. Set membership would treat
   // N>M as fully covered and let archive silently drop duplicates (residual
   // #1246 / duplicate-scenario-name blind spot).
+  // Names are compared by scenarioMatchKey, so a scenario that keeps its SCN
+  // token and changes its title still counts as covered. The reported names
+  // stay the original ones, so a message shows what the author wrote.
   const unmatched = (names: readonly string[], against: readonly string[]): string[] => {
     const remaining = new Map<string, number>();
-    for (const name of against) remaining.set(name, (remaining.get(name) ?? 0) + 1);
+    for (const name of against) {
+      const key = scenarioMatchKey(name);
+      remaining.set(key, (remaining.get(key) ?? 0) + 1);
+    }
 
     const out: string[] = [];
     for (const name of names) {
-      const left = remaining.get(name) ?? 0;
-      if (left > 0) remaining.set(name, left - 1);
+      const key = scenarioMatchKey(name);
+      const left = remaining.get(key) ?? 0;
+      if (left > 0) remaining.set(key, left - 1);
       else out.push(name);
     }
     return out;

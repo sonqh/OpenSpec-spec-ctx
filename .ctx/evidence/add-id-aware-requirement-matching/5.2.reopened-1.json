@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-27T06:58:21.479Z",
+  "files": {},
+  "kind": "manual",
+  "note": "Retitled REQ-TEL-005 in the suppress-telemetry-notice-in-json delta. Strict validate printed no Archive would refuse line. Archive on branch tmp-id-rename-check wrote the new title under REQ-TEL-005 in openspec/specs/telemetry/spec.md. Tree restored, branch deleted.",
+  "reason": "run the Verify command",
+  "reqs": [
+    "REQ-CA-014",
+    "REQ-CLIV-021"
+  ],
+  "task": "add-id-aware-requirement-matching/5.2",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": "pnpm exec vitest run test/core/validation.id-matching.test.ts -t \"ID-matched retitle\"",
+    "exit": null,
+    "stderr_tail": "",
+    "stdout_sha256": null
+  }
+}

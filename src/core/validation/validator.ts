@@ -14,7 +14,8 @@ import {
 import {
   parseDeltaSpec,
   foldRequirementName,
-  normalizeRequirementName,
+  displayMatchKey,
+  requirementMatchKey,
   extractRequirementsSection,
   diffScenarioNames,
   describeScenarioBalance,
@@ -290,7 +291,7 @@ export class Validator {
 
         // Validate ADDED
         for (const block of plan.added) {
-          const key = normalizeRequirementName(block.name);
+          const key = requirementMatchKey(block.name);
           totalDeltas++;
           if (addedNames.has(key)) {
             issues.push({ level: 'ERROR', path: entryPath, message: `Duplicate requirement in ADDED: "${block.name}"` });
@@ -336,7 +337,7 @@ export class Validator {
 
         // Validate MODIFIED
         for (const block of plan.modified) {
-          const key = normalizeRequirementName(block.name);
+          const key = requirementMatchKey(block.name);
           totalDeltas++;
           if (modifiedNames.has(key)) {
             issues.push({ level: 'ERROR', path: entryPath, message: `Duplicate requirement in MODIFIED: "${block.name}"` });
@@ -390,7 +391,7 @@ export class Validator {
 
         // Validate REMOVED (names only)
         for (const name of plan.removed) {
-          const key = normalizeRequirementName(name);
+          const key = requirementMatchKey(name);
           totalDeltas++;
           if (removedNames.has(key)) {
             issues.push({ level: 'ERROR', path: entryPath, message: `Duplicate requirement in REMOVED: "${name}"` });
@@ -401,8 +402,8 @@ export class Validator {
 
         // Validate RENAMED pairs
         for (const { from, to } of plan.renamed) {
-          const fromKey = normalizeRequirementName(from);
-          const toKey = normalizeRequirementName(to);
+          const fromKey = requirementMatchKey(from);
+          const toKey = requirementMatchKey(to);
           totalDeltas++;
           if (renamedFrom.has(fromKey)) {
             issues.push({ level: 'ERROR', path: entryPath, message: `Duplicate FROM in RENAMED: "${from}"` });
@@ -419,21 +420,23 @@ export class Validator {
         // Cross-section conflicts (within the same spec file)
         for (const n of modifiedNames) {
           if (removedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both MODIFIED and REMOVED: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both MODIFIED and REMOVED: "${displayMatchKey(n)}"` });
           }
           if (addedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both MODIFIED and ADDED: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both MODIFIED and ADDED: "${displayMatchKey(n)}"` });
           }
         }
         for (const n of addedNames) {
           if (removedNames.has(n)) {
-            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both ADDED and REMOVED: "${n}"` });
+            issues.push({ level: 'ERROR', path: entryPath, message: `Requirement present in both ADDED and REMOVED: "${displayMatchKey(n)}"` });
           }
         }
         for (const { from, to } of plan.renamed) {
-          const fromKey = normalizeRequirementName(from);
-          const toKey = normalizeRequirementName(to);
-          if (modifiedNames.has(fromKey)) {
+          const fromKey = requirementMatchKey(from);
+          const toKey = requirementMatchKey(to);
+          // FROM and TO with one ID token retitle a requirement under a stable
+          // key, so a MODIFIED with that ID already names the new header.
+          if (fromKey !== toKey && modifiedNames.has(fromKey)) {
             issues.push({ level: 'ERROR', path: entryPath, message: `MODIFIED references old name from RENAMED. Use new header for "${to}"` });
           }
           if (addedNames.has(toKey)) {
@@ -450,7 +453,7 @@ export class Validator {
               path: entryPath,
               message:
                 `Requirement present in both RENAMED and REMOVED: "${from}"` +
-                (removedFoldMatch === fromKey ? '' : ` (REMOVED spells it "${removedFoldMatch}")`),
+                (removedFoldMatch === fromKey ? '' : ` (REMOVED spells it "${displayMatchKey(removedFoldMatch)}")`),
             });
           }
         }
@@ -734,15 +737,18 @@ export class Validator {
       ];
     }
 
+    // Keyed the way archive keys the main spec (requirementMatchKey), so a
+    // MODIFIED block that keeps its ID and changes its title is compared
+    // against the block it will replace.
     const currentBlocks = new Map<string, RequirementBlock>();
     for (const block of extractRequirementsSection(mainContent).bodyBlocks) {
-      currentBlocks.set(normalizeRequirementName(block.name), block);
+      currentBlocks.set(requirementMatchKey(block.name), block);
     }
     // Archive applies RENAMED before MODIFIED, so a MODIFIED naming the new
     // header is compared against the renamed block's scenarios. Fall back to
     // the old header, or a rename-plus-modify pair would skip the check.
     const renamedFrom = new Map(
-      renamed.map(({ from, to }) => [normalizeRequirementName(to), normalizeRequirementName(from)])
+      renamed.map(({ from, to }) => [requirementMatchKey(to), requirementMatchKey(from)])
     );
 
     // Walked, not looked up once: renames chain (A→B then B→C leaves C holding
@@ -766,11 +772,15 @@ export class Validator {
     // reported ("MODIFIED references old name from RENAMED"), and the block it
     // would land on is not the one it names — so any scenario named here would
     // send the author after the wrong requirement.
-    const renamedAway = new Set(renamed.map(({ from }) => normalizeRequirementName(from)));
+    const renamedAway = new Set(
+      renamed
+        .filter(({ from, to }) => requirementMatchKey(from) !== requirementMatchKey(to))
+        .map(({ from }) => requirementMatchKey(from))
+    );
 
     const issues: ValidationIssue[] = [];
     for (const block of modified) {
-      const key = normalizeRequirementName(block.name);
+      const key = requirementMatchKey(block.name);
       if (renamedAway.has(key)) continue;
       const current = currentBlockFor(key);
       if (!current) continue;

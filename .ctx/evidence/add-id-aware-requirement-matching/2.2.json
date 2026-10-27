@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-27T06:57:37.009Z",
+  "files": {},
+  "kind": "command",
+  "reqs": [
+    "REQ-CA-014"
+  ],
+  "task": "add-id-aware-requirement-matching/2.2",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": "pnpm exec vitest run test/core/specs-apply.id-matching.test.ts -t \"new title lands\"",
+    "exit": 0,
+    "stderr_tail": "",
+    "stdout_sha256": "c1e634c393acb2feb8d8e3ad03d81b1f5285a78167dade15750a5a15695e5457"
+  }
+}
