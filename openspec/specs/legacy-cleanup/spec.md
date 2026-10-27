@@ -4,11 +4,11 @@
 Define detection and cleanup behavior for legacy OpenSpec artifacts during initialization and update workflows.
 
 ## Requirements
-### Requirement: Legacy artifact detection
+### Requirement: REQ-LC-001 Legacy artifact detection
 
 The system SHALL detect legacy OpenSpec artifacts from previous init versions.
 
-#### Scenario: Detecting legacy config files
+#### Scenario: SCN-LC-001-1 Detecting legacy config files
 
 - **WHEN** running `openspec init` on an existing project
 - **THEN** the system SHALL check for config files with OpenSpec markers:
@@ -23,7 +23,7 @@ The system SHALL detect legacy OpenSpec artifacts from previous init versions.
   - `IFLOW.md`
   - And all other tool config files from the legacy ToolRegistry
 
-#### Scenario: Detecting legacy slash command directories
+#### Scenario: SCN-LC-001-2 Detecting legacy slash command directories
 
 - **WHEN** running `openspec init` on an existing project
 - **THEN** the system SHALL check for old slash command directories:
@@ -32,14 +32,14 @@ The system SHALL detect legacy OpenSpec artifacts from previous init versions.
   - `.windsurf/workflows/openspec-*.md`
   - And equivalent directories for all tools in the legacy SlashCommandRegistry
 
-#### Scenario: Detecting legacy Kilo Code workflows
+#### Scenario: SCN-LC-001-3 Detecting legacy Kilo Code workflows
 
 - **WHEN** `.kilocode/workflows/` contains OpenSpec-managed `opsx-*.md` or `openspec-*.md` workflow files
 - **THEN** `openspec init` or legacy cleanup SHALL remove those files
 - **AND** Kilo Code commands SHALL be generated under `.kilo/command/`
 - **AND** `openspec update` SHALL NOT refresh files that remain only under `.kilocode/workflows/`
 
-#### Scenario: Detecting legacy OpenSpec structure files
+#### Scenario: SCN-LC-001-4 Detecting legacy OpenSpec structure files
 
 - **WHEN** running `openspec init` on an existing project
 - **THEN** the system SHALL check for:
@@ -47,30 +47,30 @@ The system SHALL detect legacy OpenSpec artifacts from previous init versions.
   - `openspec/project.md` (for migration messaging only, not deleted)
   - Root `AGENTS.md` with OpenSpec markers
 
-### Requirement: Legacy cleanup confirmation
+### Requirement: REQ-LC-002 Legacy cleanup confirmation
 
 The system SHALL prompt for confirmation before removing legacy artifacts.
 
-#### Scenario: Prompting for cleanup when legacy detected
+#### Scenario: SCN-LC-002-1 Prompting for cleanup when legacy detected
 
 - **WHEN** legacy artifacts are detected
 - **THEN** the system SHALL display what was found
 - **AND** prompt: "Legacy files detected. Upgrade and clean up? [Y/n]"
 - **AND** default to Yes if user presses Enter
 
-#### Scenario: User confirms cleanup
+#### Scenario: SCN-LC-002-2 User confirms cleanup
 
 - **WHEN** user responds Y or presses Enter
 - **THEN** the system SHALL remove legacy artifacts
 - **AND** proceed with skill-based setup
 
-#### Scenario: User declines cleanup
+#### Scenario: SCN-LC-002-3 User declines cleanup
 
 - **WHEN** user responds N
 - **THEN** the system SHALL abort initialization
 - **AND** display message suggesting manual cleanup or using `--force` flag
 
-#### Scenario: Non-interactive mode
+#### Scenario: SCN-LC-002-4 Non-interactive mode
 
 - **WHEN** running with `--no-interactive` or in CI environment
 - **AND** legacy artifacts are detected
@@ -78,51 +78,51 @@ The system SHALL prompt for confirmation before removing legacy artifacts.
 - **AND** display detected legacy artifacts
 - **AND** suggest running interactively or using `--force` flag
 
-### Requirement: Surgical removal of config file content
+### Requirement: REQ-LC-003 Surgical removal of config file content
 
 The system SHALL preserve user content when removing OpenSpec markers from config files.
 
-#### Scenario: Config file with only OpenSpec content
+#### Scenario: SCN-LC-003-1 Config file with only OpenSpec content
 
 - **WHEN** a config file contains only OpenSpec marker block (whitespace outside is acceptable)
 - **THEN** the system SHALL remove the OpenSpec marker block
 - **AND** preserve the file (even if empty or whitespace-only)
 - **AND** NOT delete the file (config files belong to the user's project root)
 
-#### Scenario: Config file with mixed content
+#### Scenario: SCN-LC-003-2 Config file with mixed content
 
 - **WHEN** a config file contains content outside OpenSpec markers
 - **THEN** the system SHALL remove only the `<!-- OPENSPEC:START -->` to `<!-- OPENSPEC:END -->` block
 - **AND** preserve all content before and after the markers
 - **AND** clean up any resulting double blank lines
 
-#### Scenario: Root AGENTS.md with mixed content
+#### Scenario: SCN-LC-003-3 Root AGENTS.md with mixed content
 
 - **WHEN** root `AGENTS.md` contains OpenSpec markers AND other content
 - **THEN** the system SHALL remove only the OpenSpec marker block
 - **AND** preserve the rest of the file
 
-### Requirement: Legacy directory removal
+### Requirement: REQ-LC-004 Legacy directory removal
 
 The system SHALL remove legacy slash command directories entirely.
 
-#### Scenario: Removing old slash command directory
+#### Scenario: SCN-LC-004-1 Removing old slash command directory
 
 - **WHEN** a legacy slash command directory exists (e.g., `.claude/commands/openspec/`)
 - **THEN** the system SHALL delete the entire directory and its contents
 - **AND** NOT delete the parent directory (e.g., `.claude/commands/` remains)
 
-#### Scenario: Removing legacy AGENTS.md
+#### Scenario: SCN-LC-004-2 Removing legacy AGENTS.md
 
 - **WHEN** `openspec/AGENTS.md` exists
 - **THEN** the system SHALL delete the file
 - **AND** NOT delete the `openspec/` directory itself
 
-### Requirement: project.md migration hint
+### Requirement: REQ-LC-005 project.md migration hint
 
 The system SHALL preserve project.md and display a migration hint instead of deleting it.
 
-#### Scenario: project.md exists during upgrade
+#### Scenario: SCN-LC-005-1 project.md exists during upgrade
 
 - **WHEN** `openspec/project.md` exists during legacy cleanup
 - **THEN** the system SHALL NOT delete the file
@@ -133,18 +133,18 @@ The system SHALL preserve project.md and display a migration hint instead of del
       Move useful content to config.yaml's "context:" field, then delete
   ```
 
-#### Scenario: project.md migration rationale
+#### Scenario: SCN-LC-005-2 project.md migration rationale
 
 - **GIVEN** project.md may contain user-written project documentation
 - **AND** config.yaml's context field serves the same purpose (auto-injected into artifacts)
 - **WHEN** displaying the migration hint
 - **THEN** users can migrate manually or use `/opsx:explore` to get AI assistance
 
-### Requirement: Cleanup reporting
+### Requirement: REQ-LC-006 Cleanup reporting
 
 The system SHALL report what was cleaned up.
 
-#### Scenario: Displaying cleanup summary
+#### Scenario: SCN-LC-006-1 Displaying cleanup summary
 
 - **WHEN** legacy cleanup completes
 - **THEN** the system SHALL display a summary section:
@@ -162,7 +162,7 @@ The system SHALL report what was cleaned up.
       Move useful content to config.yaml's "context:" field, then delete
   ```
 
-#### Scenario: No legacy detected
+#### Scenario: SCN-LC-006-2 No legacy detected
 
 - **WHEN** no legacy artifacts are found
 - **THEN** the system SHALL NOT display the cleanup section

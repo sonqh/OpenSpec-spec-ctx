@@ -2,11 +2,11 @@
 
 ## MODIFIED Requirements
 
-### Requirement: Skill Generation
+### Requirement: REQ-CI-012 Skill Generation
 
 The command SHALL generate Agent Skills for selected AI tools.
 
-#### Scenario: Generating skills for a tool
+#### Scenario: SCN-CI-012-1 Generating skills for a tool
 
 - **WHEN** a tool is selected during initialization
 - **THEN** create 9 skill directories under `.<tool>/skills/`:
@@ -22,7 +22,7 @@ The command SHALL generate Agent Skills for selected AI tools.
 - **AND** each SKILL.md SHALL contain YAML frontmatter with name and description
 - **AND** each SKILL.md SHALL contain the skill instructions
 
-#### Scenario: Devin skills reference skills rather than workflows
+#### Scenario: SCN-CI-012-2 Devin skills reference skills rather than workflows
 
 - **GIVEN** the Devin Local agent does not support workflows and its documentation directs users to skills instead
 - **WHEN** generating skills for the `devin` tool
@@ -30,11 +30,11 @@ The command SHALL generate Agent Skills for selected AI tools.
 - **AND** the getting-started hint SHALL name `/openspec-propose` rather than a workflow
 - **AND** under commands-only delivery, where no Devin skills are written, both the workflow bodies and the hint SHALL fall back to `/opsx-<id>`
 
-### Requirement: Slash Command Generation
+### Requirement: REQ-CI-013 Slash Command Generation
 
 The command SHALL generate opsx slash commands only for selected tools that have a registered command adapter, while keeping adapterless tools valid for skill generation.
 
-#### Scenario: Generating slash commands for a tool with a registered adapter
+#### Scenario: SCN-CI-013-1 Generating slash commands for a tool with a registered adapter
 
 - **WHEN** a tool with a registered command adapter is selected during initialization
 - **THEN** create 9 slash command files using the tool's command adapter:
@@ -50,7 +50,7 @@ The command SHALL generate opsx slash commands only for selected tools that have
 - **AND** use tool-specific path conventions (e.g., `.claude/commands/opsx/` for Claude)
 - **AND** include tool-specific frontmatter format
 
-#### Scenario: Selected tool has no command adapter
+#### Scenario: SCN-CI-013-2 Selected tool has no command adapter
 
 - **GIVEN** a selected tool has `skillsDir` configured but no registered command adapter
 - **WHEN** initialization includes command generation
@@ -58,13 +58,13 @@ The command SHALL generate opsx slash commands only for selected tools that have
 - **AND** command-file generation SHALL be skipped for that tool
 - **AND** the command output SHALL include `Commands skipped for: <tool-id> (no adapter)`
 
-#### Scenario: Kimi Code skips command-file generation
+#### Scenario: SCN-CI-013-3 Kimi Code skips command-file generation
 
 - **WHEN** the user selects Kimi Code during initialization
 - **THEN** OpenSpec SHALL treat it as a supported tool with `skillsDir: '.kimi-code'`
 - **AND** command-file generation SHALL be skipped because no Kimi adapter is registered
 
-#### Scenario: Generating workflows for Devin Desktop
+#### Scenario: SCN-CI-013-5 Generating workflows for Devin Desktop
 
 - **WHEN** the user selects Devin Desktop during initialization
 - **THEN** create one workflow file per profile workflow at `.devin/workflows/opsx-<id>.md`

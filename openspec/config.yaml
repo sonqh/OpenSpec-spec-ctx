@@ -1,4 +1,4 @@
-schema: spec-driven
+schema: spec-driven-ids
 
 context: |
   Tech stack: TypeScript, Node.js (≥20.19.0), ESM modules
@@ -34,3 +34,15 @@ rules:
     - Use existing constants and lists - don't invent detection mechanisms
     - Prefer explicit lookups over pattern matching or regex
     - If we generate it, we track it by name in a constant
+
+operations:
+  apply:
+    guidance:
+      - 'Start each task with `specctx task start <id>` and read the bundle it prints before you read specs.'
+      - 'Tag code with the REQ ID it implements (a comment `// REQ-ABC-001`). Tag tests with `// Covers: REQ-ABC-001`.'
+      - 'Close each task with `specctx task done <id>`. Never tick a checkbox by hand.'
+      - 'Run `specctx check --strict` after each task group.'
+  archive:
+    guidance:
+      - 'Run `specctx check --strict` and `openspec validate --all --strict`. Both must pass before archive.'
+      - 'Run `openspec validate --all --strict` again after archive and before push.'

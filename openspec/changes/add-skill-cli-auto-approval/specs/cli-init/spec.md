@@ -1,10 +1,10 @@
 ## MODIFIED Requirements
 
-### Requirement: Skill Generation
+### Requirement: REQ-CI-012 Skill Generation
 
 The command SHALL generate Agent Skills for selected AI tools.
 
-#### Scenario: Generating skills for a tool
+#### Scenario: SCN-CI-012-1 Generating skills for a tool
 
 - **WHEN** a tool is selected during initialization
 - **THEN** create 9 skill directories under `.<tool>/skills/`:
@@ -20,7 +20,7 @@ The command SHALL generate Agent Skills for selected AI tools.
 - **AND** each SKILL.md SHALL contain YAML frontmatter with name and description
 - **AND** each SKILL.md SHALL contain the skill instructions
 
-#### Scenario: Pre-approving the OpenSpec CLI in skill frontmatter
+#### Scenario: SCN-CI-012-3 Pre-approving the OpenSpec CLI in skill frontmatter
 
 - **WHEN** generating a skill's YAML frontmatter
 - **THEN** the frontmatter SHALL include an `allowed-tools` field with the value `Bash(openspec:*)`

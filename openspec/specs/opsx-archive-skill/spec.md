@@ -6,11 +6,11 @@ Define the expected behavior for the `/opsx:archive` skill, including readiness 
 
 ## Requirements
 
-### Requirement: OPSX Archive Skill
+### Requirement: REQ-OPAS-001 OPSX Archive Skill
 
 The system SHALL provide an `/opsx:archive` skill that archives completed changes in the experimental workflow.
 
-#### Scenario: Archive a change with all artifacts complete
+#### Scenario: SCN-OPAS-001-1 Archive a change with all artifacts complete
 
 - **WHEN** agent executes `/opsx:archive` with a change name
 - **AND** all artifacts in the schema are complete
@@ -18,18 +18,18 @@ The system SHALL provide an `/opsx:archive` skill that archives completed change
 - **THEN** the agent moves the change to `openspec/changes/archive/<target-name>/`
 - **AND** displays success message with archived location
 
-#### Scenario: Change selection prompt
+#### Scenario: SCN-OPAS-001-2 Change selection prompt
 
 - **WHEN** agent executes `/opsx:archive` without specifying a change
 - **THEN** the agent infers the change from conversation context, or auto-selects it when only one active change exists
 - **AND** when ambiguous, prompts user to select from available changes, showing only active changes (excludes archive/)
 - **AND** announces which change was selected and how to override
 
-### Requirement: Artifact Completion Check
+### Requirement: REQ-OPAS-002 Artifact Completion Check
 
 The skill SHALL check artifact completion status using the artifact graph before archiving.
 
-#### Scenario: Incomplete artifacts warning
+#### Scenario: SCN-OPAS-002-1 Incomplete artifacts warning
 
 - **WHEN** agent checks artifact status
 - **AND** one or more artifacts have status other than `done`
@@ -37,50 +37,50 @@ The skill SHALL check artifact completion status using the artifact graph before
 - **AND** prompt user for confirmation to continue
 - **AND** proceed if user confirms
 
-#### Scenario: All artifacts complete
+#### Scenario: SCN-OPAS-002-2 All artifacts complete
 
 - **WHEN** agent checks artifact status
 - **AND** all artifacts have status `done`
 - **THEN** proceed without warning
 
-### Requirement: Task Completion Check
+### Requirement: REQ-OPAS-003 Task Completion Check
 
 The skill SHALL check the selected change's task completion using `totalTasks` and `completedTasks` from `openspec list --json`, with the same selected-root flags used for the rest of the workflow. It SHALL match the change by name and use the CLI's schema-aware task resolution in both single and bulk archive workflows.
 
-#### Scenario: Incomplete tasks found
+#### Scenario: SCN-OPAS-003-1 Incomplete tasks found
 
 - **WHEN** the selected change has `totalTasks` greater than `completedTasks`
 - **THEN** display warning showing count of incomplete tasks
 - **AND** prompt user for confirmation to continue
 - **AND** proceed if user confirms
 
-#### Scenario: All tasks complete
+#### Scenario: SCN-OPAS-003-2 All tasks complete
 
 - **WHEN** the selected change has equal `totalTasks` and `completedTasks`
 - **THEN** proceed without task-related warning
 
-#### Scenario: No tracked tasks
+#### Scenario: SCN-OPAS-003-3 No tracked tasks
 
 - **WHEN** the CLI reports `totalTasks` as zero for the selected change
 - **THEN** proceed without task-related warning
 
-#### Scenario: Custom task artifact or output path
+#### Scenario: SCN-OPAS-003-4 Custom task artifact or output path
 
 - **WHEN** the schema tracks tasks under a custom artifact name, output path, or glob
 - **THEN** use the CLI totals across the schema-resolved files
 - **AND** do not infer completion from artifact existence, an artifact id of `tasks`, or the absence of a top-level `tasks.md`
 
-#### Scenario: Task progress lookup unavailable
+#### Scenario: SCN-OPAS-003-5 Task progress lookup unavailable
 
 - **WHEN** the list command fails, returns invalid JSON, omits or duplicates a selected change, or reports invalid task counts
 - **THEN** report the lookup problem and stop before syncing or archiving
 - **AND** do not treat the missing progress as zero tasks
 
-### Requirement: Spec Sync Prompt
+### Requirement: REQ-OPAS-004 Spec Sync Prompt
 
 The skill SHALL prompt to sync delta specs before archiving if specs exist.
 
-#### Scenario: Delta specs exist
+#### Scenario: SCN-OPAS-004-1 Delta specs exist
 
 - **WHEN** agent checks for delta specs
 - **AND** `specs/` directory exists in the change with spec files
@@ -93,7 +93,7 @@ The skill SHALL prompt to sync delta specs before archiving if specs exist.
 - **AND** stop without archiving if the sync fails or any capability does not verify
 - **AND** archive only after verification passes, or when the user explicitly chose to archive without syncing or to archive already-synced specs
 
-#### Scenario: Applicable ADDED delta whose main spec does not exist yet
+#### Scenario: SCN-OPAS-004-2 Applicable ADDED delta whose main spec does not exist yet
 
 - **WHEN** agent compares a delta spec against its main spec at `openspec/specs/<capability-path>/spec.md`
 - **AND** that main spec does not exist yet
@@ -105,14 +105,14 @@ The skill SHALL prompt to sync delta specs before archiving if specs exist.
 - **AND** if the delta also has `## REMOVED Requirements`, warn that they will be ignored because there is no main spec to remove them from
 - **AND** create the main spec from only the delta's `## ADDED Requirements`
 
-#### Scenario: Unsupported delta operation whose main spec does not exist yet
+#### Scenario: SCN-OPAS-004-3 Unsupported delta operation whose main spec does not exist yet
 
 - **WHEN** a delta targets a capability whose main spec does not exist yet
 - **AND** the delta has `## MODIFIED Requirements` or `## RENAMED Requirements`
 - **THEN** report that only ADDED requirements can create a new main spec
 - **AND** mark the capability as sync-blocked without writing a main spec
 
-#### Scenario: Explicitly retired capability whose main spec is missing
+#### Scenario: SCN-OPAS-004-4 Explicitly retired capability whose main spec is missing
 
 - **WHEN** a delta contains only `## REMOVED Requirements` and its main spec is missing
 - **AND** the change's `.openspec.yaml` declares `retire_capabilities: true`
@@ -120,7 +120,7 @@ The skill SHALL prompt to sync delta specs before archiving if specs exist.
 - **AND** warn that there is nothing left to remove and do not recreate the main spec
 - **AND** apply the same rule when verifying a completed sync, so retiring a capability does not block archiving
 
-#### Scenario: Nothing to put in a missing main spec without a declared retirement
+#### Scenario: SCN-OPAS-004-5 Nothing to put in a missing main spec without a declared retirement
 
 - **WHEN** a delta targets a capability whose main spec does not exist yet
 - **AND** the delta has no `## ADDED Requirements`
@@ -129,7 +129,7 @@ The skill SHALL prompt to sync delta specs before archiving if specs exist.
 - **AND** if the delta has only `## REMOVED Requirements`, warn that there is no main spec to remove them from and leave the main-spec tree unchanged
 - **AND** mark the capability as sync-blocked, since the verification pass would re-read the same missing spec
 
-#### Scenario: Sync-blocked capability during archive assessment
+#### Scenario: SCN-OPAS-004-6 Sync-blocked capability during archive assessment
 
 - **WHEN** any capability is sync-blocked during the initial assessment
 - **THEN** assess the remaining capabilities and summarize the blockers before prompting
@@ -139,17 +139,17 @@ The skill SHALL prompt to sync delta specs before archiving if specs exist.
 - **AND** do not start any sync while a capability is blocked, even if other capabilities could sync
 - **AND** a failed sync or post-sync verification still stops without archiving; do not silently fall back to skipping sync
 
-#### Scenario: No delta specs
+#### Scenario: SCN-OPAS-004-7 No delta specs
 
 - **WHEN** agent checks for delta specs
 - **AND** no `specs/` directory or no spec files exist
 - **THEN** proceed without sync prompt
 
-### Requirement: Archive Process
+### Requirement: REQ-OPAS-005 Archive Process
 
 The skill SHALL move the change to the archive folder with date prefix.
 
-#### Scenario: Successful archive
+#### Scenario: SCN-OPAS-005-1 Successful archive
 
 - **WHEN** archiving a change
 - **THEN** create `archive/` directory if it doesn't exist
@@ -157,17 +157,17 @@ The skill SHALL move the change to the archive folder with date prefix.
 - **AND** move entire change directory to archive location
 - **AND** preserve `.openspec.yaml` file in archived change
 
-#### Scenario: Archive already exists
+#### Scenario: SCN-OPAS-005-2 Archive already exists
 
 - **WHEN** target archive directory already exists
 - **THEN** fail with error message
 - **AND** suggest renaming existing archive or using different date
 
-### Requirement: Skill Output
+### Requirement: REQ-OPAS-006 Skill Output
 
 The skill SHALL provide clear feedback about the archive operation.
 
-#### Scenario: Archive complete with sync
+#### Scenario: SCN-OPAS-006-1 Archive complete with sync
 
 - **WHEN** archive completes after syncing specs
 - **THEN** display summary:
@@ -175,7 +175,7 @@ The skill SHALL provide clear feedback about the archive operation.
   - Change archived to location
   - Schema that was used
 
-#### Scenario: Archive complete without sync
+#### Scenario: SCN-OPAS-006-2 Archive complete without sync
 
 - **WHEN** archive completes without syncing specs
 - **THEN** display summary:
@@ -183,7 +183,7 @@ The skill SHALL provide clear feedback about the archive operation.
   - Change archived to location
   - Schema that was used
 
-#### Scenario: Archive complete with warnings
+#### Scenario: SCN-OPAS-006-3 Archive complete with warnings
 
 - **WHEN** archive completes with incomplete artifacts or tasks
 - **THEN** include note about what was incomplete

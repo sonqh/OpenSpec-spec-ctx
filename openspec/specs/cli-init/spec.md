@@ -4,11 +4,11 @@
 
 The `openspec init` command SHALL create a complete OpenSpec directory structure in any project, enabling immediate adoption of OpenSpec conventions with support for multiple AI coding assistants.
 ## Requirements
-### Requirement: Progress Indicators
+### Requirement: REQ-CI-001 Progress Indicators
 
 The command SHALL display progress indicators during initialization to provide clear feedback about each step.
 
-#### Scenario: Displaying initialization progress
+#### Scenario: SCN-CI-001-1 Displaying initialization progress
 
 - **WHEN** executing initialization steps
 - **THEN** validate environment silently in background (no output unless error)
@@ -18,11 +18,11 @@ The command SHALL display progress indicators during initialization to provide c
   - Show spinner: "⠋ Configuring AI tools..."
   - Then success: "✔ AI tools configured"
 
-### Requirement: Directory Creation
+### Requirement: REQ-CI-002 Directory Creation
 
 The command SHALL create the OpenSpec directory structure with config file.
 
-#### Scenario: Creating OpenSpec structure
+#### Scenario: SCN-CI-002-1 Creating OpenSpec structure
 
 - **WHEN** `openspec init` is executed
 - **THEN** create the following directory structure:
@@ -34,11 +34,11 @@ openspec/
     └── archive/
 ```
 
-### Requirement: AI Tool Configuration
+### Requirement: REQ-CI-003 AI Tool Configuration
 
 The command SHALL configure AI coding assistants with skills and slash commands using a searchable multi-select experience.
 
-#### Scenario: Prompting for AI tool selection
+#### Scenario: SCN-CI-003-1 Prompting for AI tool selection
 
 - **WHEN** run interactively
 - **THEN** display animated welcome screen with OpenSpec logo
@@ -48,16 +48,16 @@ The command SHALL configure AI coding assistants with skills and slash commands 
 - **AND** sort configured tools to appear first in the list
 - **AND** allow filtering by typing to search
 
-#### Scenario: Selecting tools to configure
+#### Scenario: SCN-CI-003-2 Selecting tools to configure
 
 - **WHEN** user selects tools and confirms
 - **THEN** generate skills in `.<tool>/skills/` directory for each selected tool
 - **AND** generate slash commands for each selected tool with a command adapter, at that adapter's own path (for example `.claude/commands/opsx/<id>.md` or `.cursor/commands/opsx-<id>.md`)
 - **AND** create `openspec/config.yaml` with default schema setting
 
-### Requirement: Interactive Mode
+### Requirement: REQ-CI-004 Interactive Mode
 The command SHALL provide an interactive menu for AI tool selection with clear navigation instructions.
-#### Scenario: Displaying interactive menu
+#### Scenario: SCN-CI-004-1 Displaying interactive menu
 - **WHEN** run in fresh or extend mode
 - **THEN** present a looping select menu that lets users toggle tools with Space and review selections with Enter
 - **AND** when Enter is pressed on a highlighted selectable tool that is not already selected, automatically add it to the selection before moving to review so the highlighted tool is configured
@@ -65,20 +65,20 @@ The command SHALL provide an interactive menu for AI tool selection with clear n
 - **AND** change the prompt copy in extend mode to "Which AI tools would you like to add or refresh?"
 - **AND** display inline instructions clarifying that Space toggles tools and Enter selects the highlighted tool before reviewing selections
 
-### Requirement: Safety Checks
+### Requirement: REQ-CI-005 Safety Checks
 The command SHALL perform safety checks to prevent overwriting existing structures and ensure proper permissions.
 
-#### Scenario: Detecting existing initialization
+#### Scenario: SCN-CI-005-1 Detecting existing initialization
 - **WHEN** the `openspec/` directory already exists
 - **THEN** inform the user that OpenSpec is already initialized, skip recreating the base structure, and enter an extend mode
 - **AND** continue to the AI tool selection step so additional tools can be configured
 - **AND** display the existing-initialization error message only when the user declines to add any AI tools
 
-### Requirement: Success Output
+### Requirement: REQ-CI-006 Success Output
 
 The command SHALL provide clear, actionable next steps upon successful initialization.
 
-#### Scenario: Displaying success message
+#### Scenario: SCN-CI-006-1 Displaying success message
 
 - **WHEN** initialization completes successfully
 - **THEN** display categorized summary:
@@ -90,16 +90,16 @@ The command SHALL provide clear, actionable next steps upon successful initializ
 - **AND** print one labeled line per distinct form when the selected tools disagree
 - **AND** display links to documentation and feedback
 
-#### Scenario: Displaying restart instruction
+#### Scenario: SCN-CI-006-2 Displaying restart instruction
 
 - **WHEN** initialization completes successfully and tools were created or refreshed
 - **THEN** display instruction to restart IDE for slash commands to take effect
 
-### Requirement: Exit Codes
+### Requirement: REQ-CI-007 Exit Codes
 
 The command SHALL use consistent exit codes to indicate different failure modes.
 
-#### Scenario: Returning exit codes
+#### Scenario: SCN-CI-007-1 Returning exit codes
 
 - **WHEN** the command completes
 - **THEN** return appropriate exit code:
@@ -108,80 +108,80 @@ The command SHALL use consistent exit codes to indicate different failure modes.
   - 2: Insufficient permissions (reserved for future use)
   - 3: User cancelled operation (reserved for future use)
 
-### Requirement: Additional AI Tool Initialization
+### Requirement: REQ-CI-008 Additional AI Tool Initialization
 `openspec init` SHALL allow users to add configuration files for new AI coding assistants after the initial setup.
 
-#### Scenario: Configuring an extra tool after initial setup
+#### Scenario: SCN-CI-008-1 Configuring an extra tool after initial setup
 - **GIVEN** an `openspec/` directory already exists and at least one AI tool file is present
 - **WHEN** the user runs `openspec init` and selects a different supported AI tool
 - **THEN** generate that tool's configuration files with OpenSpec markers the same way as during first-time initialization
 - **AND** leave existing tool configuration files unchanged except for managed sections that need refreshing
 - **AND** exit with code 0 and display a success summary highlighting the newly added tool files
 
-### Requirement: Success Output Enhancements
+### Requirement: REQ-CI-009 Success Output Enhancements
 `openspec init` SHALL summarize tool actions when initialization or extend mode completes.
 
-#### Scenario: Showing tool summary
+#### Scenario: SCN-CI-009-1 Showing tool summary
 - **WHEN** the command completes successfully
 - **THEN** display a categorized summary of tools that were created, refreshed, or skipped (including already-configured skips)
 - **AND** personalize the "Next steps" header using the names of the selected tools, defaulting to a generic label when none remain
 
-### Requirement: Exit Code Adjustments
+### Requirement: REQ-CI-010 Exit Code Adjustments
 `openspec init` SHALL treat extend mode without new native tool selections as a successful refresh.
 
-#### Scenario: Allowing empty extend runs
+#### Scenario: SCN-CI-010-1 Allowing empty extend runs
 - **WHEN** OpenSpec is already initialized and the user selects no additional natively supported tools
 - **THEN** complete successfully without requiring additional tool setup
 - **AND** preserve the existing OpenSpec structure and config files
 - **AND** exit with code 0
 
-### Requirement: Non-Interactive Mode
+### Requirement: REQ-CI-011 Non-Interactive Mode
 
 The command SHALL support non-interactive operation through command-line options.
 
-#### Scenario: Select all tools non-interactively
+#### Scenario: SCN-CI-011-1 Select all tools non-interactively
 
 - **WHEN** run with `--tools all`
 - **THEN** automatically select every available AI tool without prompting
 - **AND** proceed with skill and command generation
 
-#### Scenario: Select specific tools non-interactively
+#### Scenario: SCN-CI-011-2 Select specific tools non-interactively
 
 - **WHEN** run with `--tools claude,cursor`
 - **THEN** parse the comma-separated tool IDs
 - **AND** generate skills and commands for specified tools only
 
-#### Scenario: Skip tool configuration non-interactively
+#### Scenario: SCN-CI-011-3 Skip tool configuration non-interactively
 
 - **WHEN** run with `--tools none`
 - **THEN** create only the openspec directory structure
 - **AND** skip skill and command generation
 - **AND** create config only when config creation conditions are met
 
-#### Scenario: Invalid tool specification
+#### Scenario: SCN-CI-011-4 Invalid tool specification
 
 - **WHEN** run with `--tools invalid-tool`
 - **THEN** fail with exit code 1
 - **AND** display an error listing available values (`all`, `none`, and supported tool IDs)
 
-#### Scenario: Reserved value combined with tool IDs
+#### Scenario: SCN-CI-011-5 Reserved value combined with tool IDs
 
 - **WHEN** run with `--tools all,claude` or `--tools none,cursor`
 - **THEN** fail with exit code 1
 - **AND** display an error explaining reserved values cannot be combined with specific tool IDs
 
-#### Scenario: Missing --tools in non-interactive mode
+#### Scenario: SCN-CI-011-6 Missing --tools in non-interactive mode
 
 - **GIVEN** prompts are unavailable in non-interactive execution
 - **WHEN** user runs `openspec init` without `--tools`
 - **THEN** fail with exit code 1
 - **AND** instruct to use `--tools all`, `--tools none`, or explicit tool IDs
 
-### Requirement: Skill Generation
+### Requirement: REQ-CI-012 Skill Generation
 
 The command SHALL generate Agent Skills for selected AI tools.
 
-#### Scenario: Generating skills for a tool
+#### Scenario: SCN-CI-012-1 Generating skills for a tool
 
 - **WHEN** a tool is selected during initialization
 - **THEN** create 9 skill directories under `.<tool>/skills/`:
@@ -197,11 +197,11 @@ The command SHALL generate Agent Skills for selected AI tools.
 - **AND** each SKILL.md SHALL contain YAML frontmatter with name and description
 - **AND** each SKILL.md SHALL contain the skill instructions
 
-### Requirement: Slash Command Generation
+### Requirement: REQ-CI-013 Slash Command Generation
 
 The command SHALL generate opsx slash commands only for selected tools that have a registered command adapter, while keeping adapterless tools valid for skill generation.
 
-#### Scenario: Generating slash commands for a tool with a registered adapter
+#### Scenario: SCN-CI-013-1 Generating slash commands for a tool with a registered adapter
 
 - **WHEN** a tool with a registered command adapter is selected during initialization
 - **THEN** create 9 slash command files using the tool's command adapter:
@@ -217,7 +217,7 @@ The command SHALL generate opsx slash commands only for selected tools that have
 - **AND** use tool-specific path conventions (e.g., `.claude/commands/opsx/` for Claude)
 - **AND** include tool-specific frontmatter format
 
-#### Scenario: Selected tool has no command adapter
+#### Scenario: SCN-CI-013-2 Selected tool has no command adapter
 
 - **GIVEN** a selected tool has `skillsDir` configured but no registered command adapter
 - **WHEN** initialization includes command generation
@@ -225,70 +225,70 @@ The command SHALL generate opsx slash commands only for selected tools that have
 - **AND** command-file generation SHALL be skipped for that tool
 - **AND** the command output SHALL include `Commands skipped for: <tool-id> (no adapter)`
 
-#### Scenario: Kimi Code skips command-file generation
+#### Scenario: SCN-CI-013-3 Kimi Code skips command-file generation
 
 - **WHEN** the user selects Kimi Code during initialization
 - **THEN** OpenSpec SHALL treat it as a supported tool with `skillsDir: '.kimi-code'`
 - **AND** command-file generation SHALL be skipped because no Kimi adapter is registered
 
-#### Scenario: Grok Build skips command-file generation
+#### Scenario: SCN-CI-013-4 Grok Build skips command-file generation
 
 - **WHEN** the user selects Grok Build during initialization
 - **THEN** OpenSpec SHALL treat it as a supported tool with `skillsDir: '.grok'`
 - **AND** command-file generation SHALL be skipped because no Grok adapter is registered
 
-### Requirement: Config File Generation
+### Requirement: REQ-CI-014 Config File Generation
 
 The command SHALL create an OpenSpec config file with schema settings.
 
-#### Scenario: Creating config.yaml
+#### Scenario: SCN-CI-014-1 Creating config.yaml
 
 - **WHEN** initialization completes
 - **AND** config.yaml does not exist
 - **THEN** create `openspec/config.yaml` with default schema setting
 - **AND** display config location in output
 
-#### Scenario: Preserving existing config.yaml
+#### Scenario: SCN-CI-014-2 Preserving existing config.yaml
 
 - **WHEN** initialization runs in extend mode
 - **AND** `openspec/config.yaml` already exists
 - **THEN** preserve the existing config file
 - **AND** display "(exists)" indicator in output
 
-### Requirement: Artifact Language Configuration
+### Requirement: REQ-CI-015 Artifact Language Configuration
 
 The command SHALL let users configure the artifact language during initialization without changing existing project guidance.
 
-#### Scenario: Configuring language for a new project
+#### Scenario: SCN-CI-015-1 Configuring language for a new project
 
 - **WHEN** the user runs `openspec init --language <language>` and no OpenSpec config exists
 - **THEN** create `openspec/config.yaml` with context instructing agents to write artifacts in the selected language
 - **AND** keep OpenSpec structural headings and `SHALL`/`MUST` requirement keywords in English
 - **AND** make the language context available to artifact instructions
 
-#### Scenario: Protecting existing project context
+#### Scenario: SCN-CI-015-2 Protecting existing project context
 
 - **WHEN** the user runs `openspec init --language <language>` and an OpenSpec config already exists without the same generated language guidance
 - **THEN** fail before changing project files
 - **AND** direct the user to edit the existing config context
 
-#### Scenario: Rejecting an unsafe language value
+#### Scenario: SCN-CI-015-3 Rejecting an unsafe language value
 
 - **WHEN** the `--language` value is empty, multiline, contains control characters, or would exceed the project context size limit
 - **THEN** fail before creating OpenSpec files
 - **AND** explain why the value is invalid
 
-#### Scenario: Language config cannot be written
+#### Scenario: SCN-CI-015-4 Language config cannot be written
 
 - **WHEN** the user runs `openspec init --language <language>` and the new config cannot be written
 - **THEN** fail instead of reporting successful initialization
 - **AND** avoid creating unrelated tool files when writability can be determined in advance
 
-### Requirement: Experimental Command Alias
+### Requirement: REQ-CI-016 Experimental Command Alias
 
 The command SHALL maintain backward compatibility with the experimental command.
 
-#### Scenario: Running openspec experimental
+#### Scenario: SCN-CI-016-1 Running openspec experimental
 
 - **WHEN** user runs `openspec experimental`
 - **THEN** delegate to `openspec init`

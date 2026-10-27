@@ -1,10 +1,10 @@
 ## MODIFIED Requirements
 
-### Requirement: Archive Process
+### Requirement: REQ-CA-003 Archive Process
 
 The archive operation SHALL follow a structured process to safely move changes to the archive.
 
-#### Scenario: Performing archive
+#### Scenario: SCN-CA-003-1 Performing archive
 
 - **WHEN** archiving a change
 - **THEN** execute these steps:
@@ -17,18 +17,18 @@ The archive operation SHALL follow a structured process to safely move changes t
   7. If a spec mutation or final move fails before a complete archive is secured, restore the spec transaction and leave or return the change at its active path
   8. If a verified fallback copy completes but staged-source cleanup fails, retain the complete archive and committed spec state for recovery instead of risking the only complete copy
 
-#### Scenario: Archive already exists
+#### Scenario: SCN-CA-003-2 Archive already exists
 
 - **WHEN** target archive already exists
 - **THEN** fail with error message
 - **AND** do not overwrite existing archive
 
-#### Scenario: Successful archive
+#### Scenario: SCN-CA-003-3 Successful archive
 
 - **WHEN** move succeeds
 - **THEN** display success message with archived name and list of updated specs
 
-#### Scenario: Successful archive releases its own claim
+#### Scenario: SCN-CA-003-4 Successful archive releases its own claim
 
 - **WHEN** an archive run successfully moves a change to its archive destination
 - **THEN** remove the temporary archive claim it created

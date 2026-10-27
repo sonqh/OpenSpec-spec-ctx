@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-27T04:21:28.023Z",
+  "files": {},
+  "kind": "manual",
+  "note": "adopted",
+  "reqs": [],
+  "task": "add-validation-findings-report/2.1",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": null,
+    "exit": null,
+    "stderr_tail": "",
+    "stdout_sha256": null
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-27T04:21:27.928Z",
+  "files": {},
+  "kind": "manual",
+  "note": "adopted",
+  "reqs": [],
+  "task": "add-cline-support/2.3",
+  "tool_version": "0.1.1",
+  "verify": {
+    "command": null,
+    "exit": null,
+    "stderr_tail": "",
+    "stdout_sha256": null
+  }
+}

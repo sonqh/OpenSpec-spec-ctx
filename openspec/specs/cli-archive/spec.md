@@ -11,23 +11,23 @@ openspec archive [change-name] [--yes|-y]
 Options:
 - `--yes`, `-y`: Skip confirmation prompts (for automation)
 ## Requirements
-### Requirement: Change Selection
+### Requirement: REQ-CA-001 Change Selection
 
 The command SHALL support both interactive and direct change selection methods.
 
-#### Scenario: Interactive selection
+#### Scenario: SCN-CA-001-1 Interactive selection
 
 - **WHEN** no change-name is provided
 - **THEN** display interactive list of available changes (excluding archive/)
 - **AND** allow user to select one
 
-#### Scenario: Direct selection
+#### Scenario: SCN-CA-001-2 Direct selection
 
 - **WHEN** change-name is provided
 - **THEN** use that change directly
 - **AND** validate it exists
 
-#### Scenario: No change name and no answer available
+#### Scenario: SCN-CA-001-3 No change name and no answer available
 
 - **WHEN** no change-name is provided and the selection prompt cannot be answered
 - **THEN** report that a change name is required
@@ -35,27 +35,27 @@ The command SHALL support both interactive and direct change selection methods.
 - **AND** suggest a rerun naming the change and passing `--yes`
 - **AND** exit with a non-zero status code rather than reporting success for a run that archived nothing
 
-### Requirement: Task Completion Check
+### Requirement: REQ-CA-002 Task Completion Check
 
 The command SHALL verify task completion status before archiving to prevent premature archival.
 
-#### Scenario: Incomplete tasks found
+#### Scenario: SCN-CA-002-1 Incomplete tasks found
 
 - **WHEN** incomplete tasks are found (marked with `- [ ]`)
 - **THEN** display all incomplete tasks to the user
 - **AND** prompt for confirmation to continue
 - **AND** default to "No" for safety
 
-#### Scenario: All tasks complete
+#### Scenario: SCN-CA-002-2 All tasks complete
 
 - **WHEN** all tasks are complete OR no tasks.md exists
 - **THEN** proceed with archiving without prompting
 
-### Requirement: Archive Process
+### Requirement: REQ-CA-003 Archive Process
 
 The archive operation SHALL follow a structured process to safely move changes to the archive.
 
-#### Scenario: Performing archive
+#### Scenario: SCN-CA-003-1 Performing archive
 
 - **WHEN** archiving a change
 - **THEN** execute these steps:
@@ -68,46 +68,46 @@ The archive operation SHALL follow a structured process to safely move changes t
   7. If a spec mutation or final move fails before a complete archive is secured, restore the spec transaction and leave or return the change at its active path
   8. If a verified fallback copy completes but staged-source cleanup fails, retain the complete archive and committed spec state for recovery instead of risking the only complete copy
 
-#### Scenario: Archive already exists
+#### Scenario: SCN-CA-003-2 Archive already exists
 
 - **WHEN** target archive already exists
 - **THEN** fail with error message
 - **AND** do not overwrite existing archive
 
-#### Scenario: Successful archive
+#### Scenario: SCN-CA-003-3 Successful archive
 
 - **WHEN** move succeeds
 - **THEN** display success message with archived name and list of updated specs
 
-### Requirement: Spec Update Process
+### Requirement: REQ-CA-004 Spec Update Process
 
 After claiming the archive destination, the command SHALL apply delta changes to main specs to reflect the deployed reality, then move the change to its archive destination. It SHALL restore the spec transaction when a mutation or final move fails before a complete archive is secured. Once a verified fallback archive is complete, a staged-source cleanup failure SHALL retain that archive and committed spec state for recovery.
 
-#### Scenario: Applying delta changes
+#### Scenario: SCN-CA-004-1 Applying delta changes
 
 - **WHEN** archiving a change with delta-based specs
 - **THEN** parse and apply delta changes as defined in openspec-conventions
 - **AND** validate all operations before applying
 
-#### Scenario: Validating delta changes
+#### Scenario: SCN-CA-004-2 Validating delta changes
 
 - **WHEN** processing delta changes
 - **THEN** perform validations as specified in openspec-conventions
 - **AND** if validation fails, show specific errors and abort
 
-#### Scenario: Conflict detection
+#### Scenario: SCN-CA-004-3 Conflict detection
 
 - **WHEN** applying deltas would create duplicate requirement headers
 - **THEN** abort with error message showing the conflict
 - **AND** suggest manual resolution
 
-#### Scenario: Duplicate requirement already exists in the main spec
+#### Scenario: SCN-CA-004-4 Duplicate requirement already exists in the main spec
 
 - **WHEN** a main spec contains two canonical requirement headers with the same name
 - **THEN** reject the structurally ambiguous main spec before applying any delta
 - **AND** preserve the main spec and active change unchanged
 
-#### Scenario: New main spec inherits the delta's Purpose
+#### Scenario: SCN-CA-004-5 New main spec inherits the delta's Purpose
 
 - **WHEN** a delta creates a main spec that does not exist yet
 - **AND** the delta spec has a line-initial `## Purpose` header that is not inside a fenced code block or an HTML comment
@@ -115,55 +115,55 @@ After claiming the archive destination, the command SHALL apply delta changes to
 - **THEN** write the section body into the new main spec, trimmed but otherwise verbatim, fenced code blocks included
 - **AND** the section body runs to the next `## ` heading outside a fenced block
 
-#### Scenario: New main spec without an authored Purpose
+#### Scenario: SCN-CA-004-6 New main spec without an authored Purpose
 
 - **WHEN** a delta creates a main spec that does not exist yet
 - **AND** the delta spec has no such `## Purpose` header, or that section's body is empty once fenced blocks and HTML comments are ignored
 - **THEN** write the TBD placeholder Purpose naming the change to update after archive
 
-#### Scenario: Delta Purpose that would leave the new main spec unreadable
+#### Scenario: SCN-CA-004-7 Delta Purpose that would leave the new main spec unreadable
 
 - **WHEN** a delta creates a main spec that does not exist yet
 - **AND** carrying its `## Purpose` body over would leave a spec that reads differently to different readers - a heading or requirement header that truncates a section, an unterminated code fence that swallows one, or any HTML comment, which the section scan skips but the file keeps
 - **THEN** write the TBD placeholder Purpose instead and warn that the delta Purpose was ignored
 - **AND** complete the archive rather than aborting it
 
-#### Scenario: Carried Purpose shorter than the strict-mode minimum
+#### Scenario: SCN-CA-004-8 Carried Purpose shorter than the strict-mode minimum
 
 - **WHEN** the Purpose parsed back out of the new main spec is shorter than the minimum Purpose length strict validation enforces
 - **THEN** carry it over unchanged and warn that `openspec validate --strict` reports it as too brief
 
-#### Scenario: Delta Purpose for a capability that already has a main spec
+#### Scenario: SCN-CA-004-9 Delta Purpose for a capability that already has a main spec
 
 - **WHEN** a delta carries a `## Purpose` and the target main spec already exists
 - **THEN** leave the existing Purpose untouched
 - **AND** warn that the delta Purpose was ignored, naming the spec file to edit directly, but only when that spec has a Purpose of its own and it differs from the delta's
 
-### Requirement: Capability Retirement
+### Requirement: REQ-CA-005 Capability Retirement
 
 A delta whose REMOVED entries cover every requirement a capability has SHALL retire that capability instead of writing a main spec with no requirements, which can never pass validation.
 
-#### Scenario: Deciding that a rebuilt spec cannot be written
+#### Scenario: SCN-CA-005-1 Deciding that a rebuilt spec cannot be written
 
 - **WHEN** applying a delta leaves the rebuilt spec with no requirement blocks, and every other nonblank line in the whole file is accounted for as the title, Purpose, Requirements header, or a canonical requirement's statement, scenarios, or fenced examples
 - **THEN** put that rebuilt spec to the spec validator
 - **AND** treat it as retirable only when its sole validation error is that the spec has no requirements
 - **AND** otherwise write or reject it exactly as any other rebuilt spec, so a spec the validator still accepts, one broken in some further way, and one still holding a `###` heading are all left alone
 
-#### Scenario: Validation was skipped
+#### Scenario: SCN-CA-005-2 Validation was skipped
 
 - **WHEN** the archive runs with validation disabled
 - **THEN** retire nothing, because no verdict was produced to justify a deletion
 - **AND** write the rebuilt spec exactly as an archive without this behavior would
 
-#### Scenario: Retirement is not declared
+#### Scenario: SCN-CA-005-3 Retirement is not declared
 
 - **WHEN** a rebuilt spec is retirable but the change does not declare `retire_capabilities: true` in its metadata, or declares it in metadata that cannot be honored
 - **THEN** write the spec as any other, so the archive aborts on it exactly as it did before this behavior existed
 - **AND** name the marker as the fix in that abort, and say when a marker that is present cannot be honored
 - **AND** say nothing about the marker when retiring would not have made the spec writable anyway
 
-#### Scenario: Delta removes the capability's last requirement
+#### Scenario: SCN-CA-005-4 Delta removes the capability's last requirement
 
 - **WHEN** a retirable rebuilt spec belongs to a capability whose main spec exists
 - **AND** at least one requirement was actually removed by this run
@@ -174,40 +174,40 @@ A delta whose REMOVED entries cover every requirement a capability has SHALL ret
 - **AND** count every operation the delta applied in the archive totals
 - **AND** record the retirement in the archive warnings, naming what the deleted file held and giving a pasteable Git recovery command only when the spec lived in the caller's checkout
 
-#### Scenario: Retirement is deferred until every spec is written
+#### Scenario: SCN-CA-005-5 Retirement is deferred until every spec is written
 
 - **WHEN** an archive both retires one capability and updates another
 - **THEN** settle the archive destination before touching any spec, so a name collision cannot strand a retirement
 - **AND** perform the deletion only after every spec write has succeeded
 - **AND** report a destination claimed while the merge ran as the same collision, rather than as a raw filesystem error
 
-#### Scenario: Capability directory holds other files
+#### Scenario: SCN-CA-005-6 Capability directory holds other files
 
 - **WHEN** retiring a capability whose directory still holds other files after `spec.md` is deleted
 - **THEN** leave that directory in place
 
-#### Scenario: Removal was already synced
+#### Scenario: SCN-CA-005-7 Removal was already synced
 
 - **WHEN** a retirable rebuilt spec removed nothing this run and its main spec exists
 - **THEN** leave the file untouched
 - **AND** abort the archive with the validation error, as for any other unwritable spec, unless validation was skipped
 
-#### Scenario: Content the merge cannot account for
+#### Scenario: SCN-CA-005-8 Content the merge cannot account for
 
 - **WHEN** the spec holds any non-blank line the merge cannot name - anywhere in the file, including above the requirements section and inside a requirement block, where content the parser did not read as a new header rides along
 - **THEN** refuse the retirement, because deleting the file would take that content with it
 - **AND** say which lines stood in the way when the change declared the marker, rather than aborting on the bare validation error
 
-#### Scenario: Main spec is already gone
+#### Scenario: SCN-CA-005-9 Main spec is already gone
 
 - **WHEN** a REMOVED-only delta targets a capability that has no main spec, and the change declares `retire_capabilities: true`
 - **THEN** complete the archive without creating or retiring one
 
-### Requirement: Confirmation Behavior
+### Requirement: REQ-CA-006 Confirmation Behavior
 
 The spec update confirmation SHALL provide clear visibility into changes before they are applied.
 
-#### Scenario: Displaying confirmation
+#### Scenario: SCN-CA-006-1 Displaying confirmation
 
 - **WHEN** prompting for confirmation
 - **THEN** display a clear summary showing:
@@ -226,24 +226,24 @@ The spec update confirmation SHALL provide clear visibility into changes before 
   
   Proceed with spec updates? (Y/n)
   ```
-#### Scenario: Handling confirmation response
+#### Scenario: SCN-CA-006-2 Handling confirmation response
 
 - **WHEN** waiting for user confirmation
 - **THEN** default to "Yes", so pressing Enter proceeds (declining requires an explicit "n" or "no")
 - **AND** skip confirmation when `--yes` or `-y` flag is provided
 
-#### Scenario: User declines confirmation
+#### Scenario: SCN-CA-006-3 User declines confirmation
 
 - **WHEN** user declines the confirmation
 - **THEN** abort the entire archive operation
 - **AND** display message: "Archive cancelled. No changes were made."
 - **AND** exit with non-zero status code
 
-### Requirement: Error Conditions
+### Requirement: REQ-CA-007 Error Conditions
 
 The command SHALL handle various error conditions gracefully.
 
-#### Scenario: Handling errors
+#### Scenario: SCN-CA-007-1 Handling errors
 
 - **WHEN** errors occur
 - **THEN** handle the following conditions:
@@ -253,7 +253,7 @@ The command SHALL handle various error conditions gracefully.
   - File system permissions issues
   - A confirmation prompt that cannot be answered because no answer can be read from stdin
 
-#### Scenario: Confirmation cannot be answered
+#### Scenario: SCN-CA-007-2 Confirmation cannot be answered
 
 - **WHEN** a confirmation prompt fails because no answer can be read from stdin
 - **THEN** report which decision needed an answer
@@ -261,39 +261,39 @@ The command SHALL handle various error conditions gracefully.
 - **AND** make no filesystem change
 - **AND** exit with a non-zero status code
 
-#### Scenario: Cancellation is not treated as a missing answer
+#### Scenario: SCN-CA-007-3 Cancellation is not treated as a missing answer
 
 - **WHEN** the user cancels a prompt with Ctrl-C
 - **THEN** treat it as a cancellation rather than an unanswerable prompt
 - **AND** preserve the existing cancellation behavior
 
-### Requirement: Skip Specs Option
+### Requirement: REQ-CA-008 Skip Specs Option
 
 The archive command SHALL support a `--skip-specs` flag that skips all spec update operations and proceeds directly to archiving.
 
-#### Scenario: Skipping spec updates with flag
+#### Scenario: SCN-CA-008-1 Skipping spec updates with flag
 
 - **WHEN** executing `openspec archive <change> --skip-specs`
 - **THEN** skip spec discovery and update confirmation
 - **AND** proceed directly to moving the change to archive
 - **AND** display a message indicating specs were skipped
 
-### Requirement: Non-blocking confirmation
+### Requirement: REQ-CA-009 Non-blocking confirmation
 
 The archive operation SHALL proceed when the user declines spec updates instead of cancelling the entire operation.
 
-#### Scenario: User declines spec update confirmation
+#### Scenario: SCN-CA-009-1 User declines spec update confirmation
 
 - **WHEN** the user declines spec update confirmation
 - **THEN** skip spec updates
 - **AND** continue with the archive operation
 - **AND** display a success message indicating specs were not updated
 
-### Requirement: Display Output
+### Requirement: REQ-CA-010 Display Output
 
 The command SHALL provide clear feedback about delta operations.
 
-#### Scenario: Showing delta application
+#### Scenario: SCN-CA-010-1 Showing delta application
 
 - **WHEN** applying delta changes
 - **THEN** display for each spec:
@@ -310,18 +310,18 @@ The command SHALL provide clear feedback about delta operations.
     → 1 renamed
   ```
 
-### Requirement: Archive Validation
+### Requirement: REQ-CA-011 Archive Validation
 
 The archive command SHALL validate changes before applying them to ensure data integrity.
 
-#### Scenario: Pre-archive validation
+#### Scenario: SCN-CA-011-1 Pre-archive validation
 
 - **WHEN** executing `openspec archive change-name`
 - **THEN** validate the change structure first
 - **AND** only proceed if validation passes
 - **AND** show validation errors if it fails
 
-#### Scenario: Proposal warnings stay proposal-level
+#### Scenario: SCN-CA-011-2 Proposal warnings stay proposal-level
 
 - **WHEN** archiving a change
 - **THEN** the non-blocking proposal warnings SHALL NOT repeat requirement-level
@@ -330,7 +330,7 @@ The archive command SHALL validate changes before applying them to ensure data i
   reported as missing a scenario
 - **AND** proposal-level issues SHALL still be reported
 
-#### Scenario: Force archive without validation
+#### Scenario: SCN-CA-011-3 Force archive without validation
 
 - **WHEN** executing `openspec archive change-name --no-validate`
 - **THEN** skip validation (unsafe mode)

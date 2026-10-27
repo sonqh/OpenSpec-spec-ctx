@@ -1,6 +1,6 @@
 ## ADDED Requirements
 
-### Requirement: Spec validation SHALL report a Purpose left as the archive placeholder
+### Requirement: REQ-CLIV-020 Spec validation SHALL report a Purpose left as the archive placeholder
 
 The `validate` command SHALL report, as a warning against the spec's Purpose, a
 `## Purpose` that is still a placeholder rather than a Purpose someone wrote:
@@ -44,7 +44,7 @@ archive validates a rebuilt spec without `--strict` and a warning does not chang
 that verdict: a spec archive writes SHALL still pass the validation it would have
 passed before this requirement existed.
 
-#### Scenario: The placeholder passes by default and fails under strict
+#### Scenario: SCN-CLIV-020-1 The placeholder passes by default and fails under strict
 
 - **GIVEN** a main spec whose Purpose is the placeholder archive wrote
 - **WHEN** `openspec validate --specs` runs
@@ -52,26 +52,26 @@ passed before this requirement existed.
   saying to edit the main spec directly
 - **AND** the spec is reported valid
 
-#### Scenario: Strict validation fails on the placeholder
+#### Scenario: SCN-CLIV-020-2 Strict validation fails on the placeholder
 
 - **GIVEN** the same main spec
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** the spec is reported invalid
 
-#### Scenario: An authored Purpose raising an open question is not reported
+#### Scenario: SCN-CLIV-020-3 An authored Purpose raising an open question is not reported
 
 - **GIVEN** a Purpose reading "Bounds how often a failed delivery is retried. The exact budget is TBD pending load tests."
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** report no placeholder warning, because the marker does not open the Purpose
 - **AND** the spec is reported valid
 
-#### Scenario: A Purpose left as a TODO is reported like a TBD
+#### Scenario: SCN-CLIV-020-4 A Purpose left as a TODO is reported like a TBD
 
 - **GIVEN** a Purpose consisting only of "TODO"
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** report the placeholder warning, the same finding a bare "TBD" reports
 
-#### Scenario: A Purpose quoting the placeholder inside a fence is not reported
+#### Scenario: SCN-CLIV-020-5 A Purpose quoting the placeholder inside a fence is not reported
 
 - **GIVEN** a Purpose that explains the placeholder and shows it inside a fenced
   code block
@@ -79,32 +79,32 @@ passed before this requirement existed.
 - **THEN** report no placeholder warning
 - **AND** the spec is reported valid
 
-#### Scenario: A word beginning with the marker is not reported
+#### Scenario: SCN-CLIV-020-6 A word beginning with the marker is not reported
 
 - **GIVEN** a Purpose opening "TBDs raised during design review are tracked in the linked issue.", or the same sentence opening with "TODOs"
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** report no placeholder warning
 
-#### Scenario: A bare TBD is reported once
+#### Scenario: SCN-CLIV-020-7 A bare TBD is reported once
 
 - **GIVEN** a Purpose consisting only of "TBD"
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** report exactly one finding against the Purpose, the placeholder warning
   rather than the too-brief warning
 
-#### Scenario: A terse but authored Purpose still reports as too brief
+#### Scenario: SCN-CLIV-020-8 A terse but authored Purpose still reports as too brief
 
 - **GIVEN** a Purpose reading "Does stuff."
 - **WHEN** `openspec validate --specs --strict` runs
 - **THEN** report the too-brief warning and no placeholder warning
 
-#### Scenario: Archive still writes the spec it would have written
+#### Scenario: SCN-CLIV-020-9 Archive still writes the spec it would have written
 
 - **GIVEN** a change whose delta introduces a capability with no usable `## Purpose`
 - **WHEN** `openspec archive` validates the rebuilt spec before writing it
 - **THEN** that spec is reported valid and archive completes exactly as before
 
-#### Scenario: Line endings do not change what is reported
+#### Scenario: SCN-CLIV-020-10 Line endings do not change what is reported
 
 - **GIVEN** two main specs with the same placeholder Purpose, one saved with LF
   line endings and one with CRLF
