@@ -173,3 +173,4 @@ dist-bin/
 
 # spec-ctx
 .ctx/index.json
+.ctx/gate-log.jsonl
